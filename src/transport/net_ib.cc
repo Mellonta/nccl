@@ -20,6 +20,7 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "ibvwrap.h"
 
@@ -546,6 +547,32 @@ ncclResult_t ncclIbAccept(void* listenComm, void** recvComm) {
     .iid=gid.global.interface_id,
     .mtu=remQpInfo.mtu
   };
+
+  char ip_[INET_ADDRSTRLEN];
+  inet_ntop(AF_INET, &(sockaddr.sin_addr), ip_, INET_ADDRSTRLEN);
+  struct ifaddrs *ifaddr, *ifa;
+  int s_;
+  char host[NI_MAXHOST];
+  if (getifaddrs(&ifaddr) == -1) exit(EXIT_FAILURE);
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == NULL) continue;
+    s_ = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+    if ((strcmp(ifa->ifa_name, "eth0") == 0) && (ifa->ifa_addr->sa_family == AF_INET)) {
+      if (s_ != 0) exit(EXIT_FAILURE);
+      break;
+    }
+  }
+  freeifaddrs(ifaddr);
+
+  if (strcmp(ip_, host) != 0) {
+    INFO(NCCL_ALL, "RDMALOG: %s:%"
+    PRIu32
+    " -> %s:%"
+    PRIu32
+    " with port: %"
+    PRIu32
+    "\n", ip_, remQpInfo.qpn, host, qpInfo.qpn, cal_sport(qpInfo.qpn, remQpInfo.qpn));
+  }
 
   NCCLCHECK(socketSend(rComm->fd, &qpInfo, sizeof(qpInfo)));
   *recvComm = rComm;

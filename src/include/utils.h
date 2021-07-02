@@ -37,4 +37,12 @@ static long log2i(long n) {
  return l;
 }
 
+static uint32_t cal_sport(uint32_t lqpn, uint32_t rqpn) {
+  lqpn ^= lqpn >> 16;
+  lqpn = lqpn & 0xFFFF;
+  rqpn ^= rqpn >> 16;
+  rqpn = rqpn & 0xFFFF;
+  return (lqpn ^ rqpn) | 0xC000;
+}
+
 #endif
