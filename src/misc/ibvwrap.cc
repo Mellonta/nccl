@@ -52,18 +52,18 @@ ncclResult_t wrap_ibv_symbols(void) {
     return (ibvState == ibvInitialized) ? ncclSuccess : ncclSystemError;
   }
 
-  static void* ibvhandle = NULL;
+  static void* ibvhandle = RTLD_DEFAULT;
   void* tmp;
   void** cast;
 
-  ibvhandle=dlopen("libibverbs.so", RTLD_NOW);
-  if (!ibvhandle) {
-    ibvhandle=dlopen("libibverbs.so.1", RTLD_NOW);
-    if (!ibvhandle) {
-      WARN("Failed to open libibverbs.so[.1]");
-      goto teardown;
-    }
-  }
+//  ibvhandle=dlopen("libibverbs.so", RTLD_NOW);
+//  if (!ibvhandle) {
+//    ibvhandle=dlopen("libibverbs.so.1", RTLD_NOW);
+//    if (!ibvhandle) {
+//      WARN("Failed to open libibverbs.so[.1]");
+//      goto teardown;
+//    }
+//  }
 
 #define LOAD_SYM(handle, symbol, funcptr) do {         \
     cast = (void**)&funcptr;                             \
