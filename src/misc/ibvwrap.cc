@@ -67,7 +67,7 @@ ncclResult_t wrap_ibv_symbols(void) {
 
 #define LOAD_SYM(handle, symbol, funcptr) do {         \
     cast = (void**)&funcptr;                             \
-    tmp = dlvsym(handle, symbol, IBVERBS_VERSION);       \
+    tmp = dlsym(handle, symbol);       \
     if (tmp == NULL) {                                   \
       WARN("dlvsym failed on %s - %s version %s", symbol, dlerror(), IBVERBS_VERSION);  \
       goto teardown;                                     \
